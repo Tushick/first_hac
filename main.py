@@ -23,21 +23,47 @@ print(train_data)
 
 input_data = []
 output_data = []
+max_len_data = 0
 for string in train_data["Question"]:
     data = tokenizer.tokenize(string)
-    input_data.append(data)
+
+    if len(data) > max_len_data:
+        max_len_data = len(data)
+
+    int_data = []
+    for i in data:
+        int_data.append(ord(i))
+
+    input_data.append(int_data)
 for class_str in train_data["answer_class"]:
     output_data.append(class_str)
 
-
-print(input_data)
-
-
-# input_data = np.array()
-# output_data = np.array()
-
+for index, arr in enumerate(input_data):
+    while len(arr) < max_len_data:
+        arr.append(-1)
+    input_data[index] = arr
+    
 
 
+input_data = np.array(input_data)
+output_data = np.array(output_data)
 
 
+model = keras.Sequential()
+# model.add([
+#     Dense(units=1),
+# ])
+model.add(Dense(units=1, activation='relu'))
 
+
+model.compile(loss='mse', optimizer='sgd')
+
+fit_result = model.fit(input_data, 
+                       output_data, 
+                       epochs=200
+                        )
+
+
+if not os.path.isdir(MODELS_SAVE_DIR): os.mkdir(MODELS_SAVE_DIR)
+
+model.save(f'{MODELS_SAVE_DIR}/model.keras')
